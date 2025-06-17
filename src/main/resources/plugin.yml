@@ -1,0 +1,25 @@
+name: ThreeTeamKingdomWar
+version: 1.0
+main: nl.jouwplugin.ThreeTeamKingdomWar
+api-version: '1.21'
+
+commands:
+  team:
+    description: Team management commands
+    usage: /team <join|leave|create> <team>
+    permission: tkw.admin
+
+  teambeacon:
+    description: Team beacon management
+    usage: /teambeacon <create> <red|blue|green>
+    permission: tkw.admin
+
+  phase:
+    description: Manage game phases
+    usage: /phase <create|delete|set> <name> [time]
+    permission: tkw.admin
+
+  start:
+    description: Starts the game and teleports players to their beacons
+    usage: /start
+    permission: tkw.admin
