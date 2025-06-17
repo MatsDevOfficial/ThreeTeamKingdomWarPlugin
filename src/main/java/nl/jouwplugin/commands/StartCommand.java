@@ -1,37 +1,40 @@
 package nl.jouwplugin.commands;
 
-import nl.jouwplugin.ThreeTeamKingdomWar;
+import nl.jouwplugin.managers.TeamColor;
 import nl.jouwplugin.managers.TeamManager;
-import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
-import org.bukkit.Location;
-import org.bukkit.command.*;
-import org.bukkit.entity.Player;
+import nl.jouwplugin.managers.BeaconManager;
+import org.bukkit.command.Command;
+import org.bukkit.command.CommandExecutor;
+import org.bukkit.command.CommandSender;
 
 public class StartCommand implements CommandExecutor {
 
+    private final TeamManager teamManager;
+    private final BeaconManager beaconManager;
+
+    public StartCommand(TeamManager teamManager, BeaconManager beaconManager) {
+        this.teamManager = teamManager;
+        this.beaconManager = beaconManager;
+    }
+
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
-
-        var teamManager = ThreeTeamKingdomWar.getInstance().getTeamManager();
-        var beaconManager = ThreeTeamKingdomWar.getInstance().getBeaconManager();
-
-        for (var entry : teamManager.getTeams().entrySet()) {
-            TeamManager.TeamColor color = entry.getKey();
-            Location beaconLoc = beaconManager.getBeacon(color);
-
-            if (beaconLoc == null) {
-                sender.sendMessage(ChatColor.RED + "Beacon for " + color.name() + " team is missing!");
-                return true;
-            }
-
-            for (Player player : entry.getValue()) {
-                player.teleport(beaconLoc.clone().add(0.5, 1, 0.5));
-                player.sendMessage(ChatColor.GOLD + "You have been teleported to your team's beacon.");
-            }
+        if (args.length == 0) {
+            sender.sendMessage("Usage: /start");
+            return true;
         }
 
-        Bukkit.broadcastMessage(ChatColor.AQUA + "The game has started!");
+        // Voorbeeld waar TeamColor als String moet:
+        for (TeamColor teamColor : teamManager.getTeams()) {
+            // Gebruik .name() om TeamColor naar String te converteren
+            String teamName = teamColor.name();
+
+            // voorbeeld: teleport players, start game logic etc
+            sender.sendMessage("Starting for team: " + teamName);
+        }
+
+        // Jouw start logica hier...
+
         return true;
     }
 }

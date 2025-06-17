@@ -1,32 +1,52 @@
 package nl.jouwplugin.commands;
 
+import nl.jouwplugin.managers.BeaconManager;
+import nl.jouwplugin.managers.TeamColor;
 import nl.jouwplugin.managers.TeamManager;
-import org.bukkit.ChatColor;
 import org.bukkit.Material;
-import org.bukkit.command.*;
+import org.bukkit.command.Command;
+import org.bukkit.command.CommandExecutor;
+import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
 public class TeamBeaconCommand implements CommandExecutor {
+
+    private final BeaconManager beaconManager;
+    private final TeamManager teamManager;
+
+    public TeamBeaconCommand(BeaconManager beaconManager, TeamManager teamManager) {
+        this.beaconManager = beaconManager;
+        this.teamManager = teamManager;
+    }
+
     @Override
-    public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args) {
-        if (args.length != 1 || !(sender instanceof Player player)) {
-            sender.sendMessage("Usage: /teambeacon <red|blue|green>");
+    public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
+        if (!(sender instanceof Player player)) {
+            sender.sendMessage("Only players can use this command.");
+            return true;
+        }
+
+        if (args.length != 1) {
+            player.sendMessage("Usage: /teambeacon <red|blue|green>");
             return true;
         }
 
         try {
-            TeamManager.TeamColor color = TeamManager.TeamColor.valueOf(args[0].toUpperCase());
+            TeamColor teamColor = TeamColor.valueOf(args[0].toUpperCase());
+
             ItemStack beacon = new ItemStack(Material.BEACON);
             ItemMeta meta = beacon.getItemMeta();
-            meta.setDisplayName(color.name() + " Team Beacon");
+            meta.setDisplayName(teamColor.name() + " Team Beacon");
             beacon.setItemMeta(meta);
+
             player.getInventory().addItem(beacon);
-            player.sendMessage(ChatColor.GREEN + color.name() + " beacon received.");
+            player.sendMessage(teamColor.name() + " team beacon given!");
         } catch (IllegalArgumentException e) {
-            sender.sendMessage(ChatColor.RED + "Invalid team color.");
+            player.sendMessage("Invalid team. Choose red, blue, or green.");
         }
+
         return true;
     }
 }

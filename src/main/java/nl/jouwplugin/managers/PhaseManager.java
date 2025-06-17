@@ -1,61 +1,32 @@
 package nl.jouwplugin.managers;
 
 import nl.jouwplugin.ThreeTeamKingdomWar;
-import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
-
-import java.util.LinkedHashMap;
-import java.util.Map;
+import org.bukkit.scheduler.BukkitRunnable;
 
 public class PhaseManager {
 
-    public static class Phase {
-        public String name;
-        public int seconds;
+    private String currentPhase;
+    private int timer;
 
-        public Phase(String name, int seconds) {
-            this.name = name;
-            this.seconds = seconds;
-        }
-    }
+    public void startPhase(String phaseName, int seconds) {
+        this.currentPhase = phaseName;
+        this.timer = seconds;
 
-    private final Map<String, Phase> phases = new LinkedHashMap<>();
-    private Phase currentPhase;
-
-    public void createPhase(String name) {
-        phases.put(name, new Phase(name, 0));
-    }
-
-    public void deletePhase(String name) {
-        phases.remove(name);
-    }
-
-    public void startPhase(String name, int time) {
-        Phase phase = phases.get(name);
-        if (phase != null) {
-            phase.seconds = time;
-            currentPhase = phase;
-            startCountdown();
-        }
-    }
-
-    private void startCountdown() {
-        if (currentPhase == null) return;
-        Bukkit.getScheduler().runTaskTimer(ThreeTeamKingdomWar.getInstance(), new Runnable() {
-            int timeLeft = currentPhase.seconds;
-
+        new BukkitRunnable() {
             @Override
             public void run() {
-                if (timeLeft <= 0) {
-                    Bukkit.broadcastMessage(ChatColor.LIGHT_PURPLE + "Phase " + currentPhase.name + " ended.");
-                    currentPhase = null;
-                    Bukkit.getScheduler().cancelTasks(ThreeTeamKingdomWar.getInstance());
-                    return;
+                timer--;
+                if (timer <= 0) {
+                    cancel();
+                    // Phase ended logic
+                } else {
+                    // Update scoreboard, etc
+                    ThreeTeamKingdomWar.getInstance().getServer().getConsoleSender()
+                            .sendMessage("Phase " + currentPhase + " time left: " + timer);
                 }
-                Bukkit.getOnlinePlayers().forEach(p ->
-                        p.sendActionBar(ChatColor.YELLOW + "Phase: " + currentPhase.name + " | " + timeLeft + "s"));
-                timeLeft--;
             }
-        }, 0L, 20L);
+        }.runTaskTimer(ThreeTeamKingdomWar.getInstance(), 0L, 20L);
     }
+
+    // andere methodes
 }

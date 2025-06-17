@@ -1,56 +1,33 @@
 package nl.jouwplugin.managers;
 
-import nl.jouwplugin.ThreeTeamKingdomWar;
-import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
-import org.bukkit.event.EventHandler;
-import org.bukkit.event.Listener;
-import org.bukkit.event.player.PlayerRespawnEvent;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
 
-public class TeamManager implements Listener {
+public class TeamManager {
 
-    public enum TeamColor { RED, BLUE, GREEN }
+    private final Map<Player, TeamColor> playerTeams = new HashMap<>();
 
-    private final Map<TeamColor, Set<Player>> teams = new HashMap<>();
-
-    public TeamManager() {
-        for (TeamColor color : TeamColor.values()) {
-            teams.put(color, new HashSet<>());
-        }
+    public void addPlayerToTeam(Player player, TeamColor team) {
+        playerTeams.put(player, team);
     }
 
-    public void joinTeam(Player player, TeamColor color) {
-        for (Set<Player> set : teams.values()) {
-            set.remove(player);
-        }
-        if (teams.get(color).size() >= 30) {
-            player.sendMessage(ChatColor.RED + "That team is full.");
-            return;
-        }
-        teams.get(color).add(player);
-        player.setPlayerListName(color.name() + " | " + player.getName());
-        player.sendMessage(ChatColor.GREEN + "Joined " + color.name() + " team!");
+    public void removePlayerFromTeam(Player player) {
+        playerTeams.remove(player);
     }
 
-    public Map<TeamColor, Set<Player>> getTeams() {
-        return teams;
+    public TeamColor getTeam(Player player) {
+        return playerTeams.get(player);
     }
 
-    @EventHandler
-    public void onRespawn(PlayerRespawnEvent event) {
-        Player player = event.getPlayer();
-        for (Map.Entry<TeamColor, Set<Player>> entry : teams.entrySet()) {
-            if (entry.getValue().contains(player)) {
-                var beaconLoc = ThreeTeamKingdomWar.getInstance().getBeaconManager().getBeacon(entry.getKey());
-                if (beaconLoc != null && beaconLoc.getBlock().getType().isBlock()) {
-                    event.setRespawnLocation(beaconLoc.add(0.5, 1, 0.5));
-                } else {
-                    player.sendMessage(ChatColor.RED + "Your beacon is destroyed — you cannot respawn.");
-                }
-                break;
-            }
-        }
+    public boolean isInTeam(Player player) {
+        return playerTeams.containsKey(player);
+    }
+
+    public Set<TeamColor> getTeams() {
+        return playerTeams.values().stream().collect(Collectors.toSet());
     }
 }
